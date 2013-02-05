@@ -21,7 +21,6 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Topic :: Internet',
-        'Topic :: Communications :: Fax',
         'Topic :: Software Development :: Libraries :: Python Modules',
     )
 )
