@@ -292,6 +292,7 @@ class EncryptedPickle(object):
     def verify_signature(self, data):
         '''Verify sealed data signature'''
 
+        data = self._read_magic(data)
         data = self._urlsafe_b64decode(data)
         options = self._read_header(data)
         self._unsign_data(data, options)
@@ -299,6 +300,7 @@ class EncryptedPickle(object):
     def get_data_options(self, data, verify_signature=True):
         '''Get sealed data options'''
 
+        data = self._read_magic(data)
         data = self._urlsafe_b64decode(data)
         options = self._read_header(data)
         if verify_signature:
