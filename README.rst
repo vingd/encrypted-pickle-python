@@ -90,7 +90,8 @@ Example Usage
 
     unsealed, unsealed_options = encoder.unseal(sealed, return_options=True)
     print("* unsealed: %s" % unsealed)
-    print("* timestamp: %f" % unsealed_options['info']['timestamp'])
+    if unsealed_options['info']['timestamp']:
+        print("* timestamp: %d" % unsealed_options['info']['timestamp'])
 
 
 Copyright and License
