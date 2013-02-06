@@ -112,7 +112,7 @@ Copyright and License
 =====================
 
 EncryptedPickle for Python is Copyright (c) 2013 Vingd, Inc. and licensed under
-the MIT license (see LICENSE.txt).
+the MIT License.
 
 
 .. _`iron`: https://github.com/hueniverse/iron
