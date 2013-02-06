@@ -33,7 +33,13 @@ Example Usage
     unsealed = encoder.unseal(sealed)
     print("* unsealed: %s" % unsealed)
 
-    # Customization example
+
+Customization Example
+=====================
+
+.. code-block:: python
+
+    from encryptedpickle import encryptedpickle
 
     # You can use different passphrases for signature and encryption
     signature_passphrases = {
@@ -41,7 +47,15 @@ Example Usage
            'change me! change me! change me! change me!'
     }
 
-    encoder.set_signature_passphrases(signature_passphrases)
+    encryption_passphrases = {
+        0: 'Change me! CHange me! CHAnge me! CHANge me!'
+           'CHANGe me! CHANGE ME! CHANGE Me! CHANGE ME!'
+    }
+
+    data = {'example': 123, 'test': 'testing'}
+
+    encoder = encryptedpickle.EncryptedPickle(signature_passphrases,
+                                              encryption_passphrases)
 
     encryption = {
         # Add new encryption algorithm specification with id = 255.
