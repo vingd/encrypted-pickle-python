@@ -4,7 +4,7 @@ from distutils.core import setup
 
 setup(
     name='EncryptedPickle',
-    version='0.1.1',
+    version='0.1.2',
     description='Class for pickling and encrypting data',
     long_description=open('README.rst').read(),
     author='Andjelko Horvat',
