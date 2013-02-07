@@ -22,7 +22,7 @@ from Crypto.Hash import SHA, SHA256, SHA384, SHA512
 class EncryptedPickle(object):
     '''EncryptedPickle class'''
 
-    MAGIC = 'EP'
+    DEFAULT_MAGIC = 'EP'
 
     VERSIONS = {
         1: {
@@ -163,7 +163,11 @@ class EncryptedPickle(object):
         },
     }
 
-    def __init__(self, signature_passphrases=None, encryption_passphrases=None):
+    def __init__(self,
+                 signature_passphrases=None,
+                 encryption_passphrases=None,
+                 options=None):
+
         self.signature_algorithms = self.DEFAULT_SIGNATURE.copy()
         self.encryption_algorithms = self.DEFAULT_ENCRYPTION.copy()
         self.serialization_algorithms = self.DEFAULT_SERIALIZATION.copy()
@@ -172,7 +176,10 @@ class EncryptedPickle(object):
                                                        {}, replace_data=True)
         self.encryption_passphrases = self._update_dict(encryption_passphrases,
                                                         {}, replace_data=True)
+        self.magic = self.DEFAULT_MAGIC
         self.options = self.DEFAULT_OPTIONS.copy()
+        if options:
+            self.set_options(options)
 
     def set_signature_passphrases(self, signature_passphrases):
         '''Set signature passphrases'''
@@ -229,6 +236,10 @@ class EncryptedPickle(object):
 
         options = options.copy()
 
+        if 'magic' in options:
+            self.set_magic(options['magic'])
+            del(options['magic'])
+
         if 'flags' in options:
             flags = options['flags']
             del(options['flags'])
@@ -256,6 +267,15 @@ class EncryptedPickle(object):
     def get_options(self):
         '''Get options used for sealing'''
         return self.options
+
+    def set_magic(self, magic):
+        '''Set magic (prefix). Magic is not signed.'''
+        if magic is None or isinstance(magic, basestring):
+            self.magic = magic
+
+    def get_magic(self):
+        '''Get magic (prefix)'''
+        return self.magic
 
     def seal(self, data, options=None):
         '''Seal data'''
@@ -512,9 +532,12 @@ class EncryptedPickle(object):
     def _read_magic(self, data):
         '''Read magic'''
 
-        magic_size = len(self.MAGIC)
+        if not self.magic:
+            return data
+
+        magic_size = len(self.magic)
         magic = data[:magic_size]
-        if magic != self.MAGIC:
+        if magic != self.magic:
             raise Exception('Invalid magic')
         data = data[magic_size:]
 
@@ -523,7 +546,10 @@ class EncryptedPickle(object):
     def _add_magic(self, data):
         '''Add magic'''
 
-        return self.MAGIC + data
+        if self.magic:
+            return self.magic + data
+
+        return data
 
     def _add_header(self, data, options):
         '''Add header to data'''
