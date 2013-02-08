@@ -269,9 +269,11 @@ class EncryptedPickle(object):
         return self.options
 
     def set_magic(self, magic):
-        '''Set magic (prefix). Magic is not signed.'''
-        if magic is None or isinstance(magic, basestring):
+        '''Set magic (prefix)'''
+        if magic is None or isinstance(magic, str):
             self.magic = magic
+        else:
+            raise TypeError('Invalid value for magic')
 
     def get_magic(self):
         '''Get magic (prefix)'''
@@ -286,7 +288,9 @@ class EncryptedPickle(object):
         data = self._compress_data(data, options)
         data = self._encrypt_data(data, options)
         data = self._add_header(data, options)
+        data = self._add_magic(data)
         data = self._sign_data(data, options)
+        data = self._remove_magic(data)
         data = self._urlsafe_b64encode(data)
         data = self._add_magic(data)
 
@@ -295,10 +299,12 @@ class EncryptedPickle(object):
     def unseal(self, data, return_options=False):
         '''Unseal data'''
 
-        data = self._read_magic(data)
+        data = self._remove_magic(data)
         data = self._urlsafe_b64decode(data)
         options = self._read_header(data)
+        data = self._add_magic(data)
         data = self._unsign_data(data, options)
+        data = self._remove_magic(data)
         data = self._remove_header(data, options)
         data = self._decrypt_data(data, options)
         data = self._decompress_data(data, options)
@@ -529,8 +535,8 @@ class EncryptedPickle(object):
 
         return data
 
-    def _read_magic(self, data):
-        '''Read magic'''
+    def _remove_magic(self, data):
+        '''Verify and remove magic'''
 
         if not self.magic:
             return data
