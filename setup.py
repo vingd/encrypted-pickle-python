@@ -1,20 +1,24 @@
 #!/usr/bin/env python
 
+'''EncryptedPickle Setup'''
+
 from distutils.core import setup
 
+import encryptedpickle
+
 setup(
-    name='EncryptedPickle',
-    version='0.1.2',
-    description='Class for pickling and encrypting data',
+    name=encryptedpickle.__title__,
+    version=encryptedpickle.__version__,
+    author=encryptedpickle.__author__,
+    author_email=encryptedpickle.__author_email__,
+    url=encryptedpickle.__url__,
+    license=encryptedpickle.__license__,
+    description=encryptedpickle.__doc__,
     long_description=open('README.rst').read(),
-    author='Andjelko Horvat',
-    author_email='comel@vingd.com',
-    url='https://github.com/vingd/encrypted-pickle-python',
     packages=['encryptedpickle'],
     install_requires=[i.strip() for i in open('requirements.txt').readlines()],
     platforms=['OS Independent'],
-    license='MIT License',
-    classifiers=(
+    classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Programming Language :: Python',
@@ -22,5 +26,5 @@ setup(
         'Operating System :: OS Independent',
         'Topic :: Internet',
         'Topic :: Software Development :: Libraries :: Python Modules',
-    )
+    ]
 )
