@@ -318,17 +318,19 @@ class EncryptedPickle(object):
     def verify_signature(self, data):
         '''Verify sealed data signature'''
 
-        data = self._read_magic(data)
+        data = self._remove_magic(data)
         data = self._urlsafe_b64decode(data)
         options = self._read_header(data)
+        data = self._add_magic(data)
         self._unsign_data(data, options)
 
     def get_data_options(self, data, verify_signature=True):
         '''Get sealed data options'''
 
-        data = self._read_magic(data)
+        data = self._remove_magic(data)
         data = self._urlsafe_b64decode(data)
         options = self._read_header(data)
+        data = self._add_magic(data)
         if verify_signature:
             data = self._unsign_data(data, options)
         return options
