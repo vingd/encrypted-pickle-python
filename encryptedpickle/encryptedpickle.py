@@ -5,7 +5,6 @@ Class for encrypting and signing data with support for versions, serialization,
 compression, and passphrase generations (rotation)
 '''
 
-import hmac
 import zlib
 import base64
 from time import time
@@ -16,7 +15,7 @@ import simplejson as json
 from pbkdf2 import PBKDF2
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
-from Crypto.Hash import SHA, SHA256, SHA384, SHA512
+from Crypto.Hash import HMAC, SHA, SHA256, SHA384, SHA512
 
 
 class EncryptedPickle(object):
@@ -746,7 +745,7 @@ class EncryptedPickle(object):
 
         digestmod = EncryptedPickle._get_hashlib(algorithm['subtype'])
 
-        return hmac.new(key, data, digestmod).digest()
+        return HMAC.new(key, data, digestmod).digest()
 
     @staticmethod
     def _aes_encrypt(data, algorithm, key):
