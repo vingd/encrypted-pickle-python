@@ -5,8 +5,9 @@ Class for encrypting and signing data with support for versions, serialization,
 compression, and passphrase generations (rotation)
 '''
 
+from __future__ import absolute_import
+
 import zlib
-import base64
 from time import time
 from struct import pack, unpack
 from collections import namedtuple
@@ -16,6 +17,12 @@ from pbkdf2 import PBKDF2
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 from Crypto.Hash import HMAC, SHA, SHA256, SHA384, SHA512
+
+from .utils import (
+    const_equal,
+    urlsafe_nopadding_b64encode,
+    urlsafe_nopadding_b64decode
+)
 
 
 class EncryptedPickle(object):
@@ -290,7 +297,7 @@ class EncryptedPickle(object):
         data = self._add_magic(data)
         data = self._sign_data(data, options)
         data = self._remove_magic(data)
-        data = self._urlsafe_b64encode(data)
+        data = urlsafe_nopadding_b64encode(data)
         data = self._add_magic(data)
 
         return data
@@ -299,7 +306,7 @@ class EncryptedPickle(object):
         '''Unseal data'''
 
         data = self._remove_magic(data)
-        data = self._urlsafe_b64decode(data)
+        data = urlsafe_nopadding_b64decode(data)
         options = self._read_header(data)
         data = self._add_magic(data)
         data = self._unsign_data(data, options)
@@ -318,7 +325,7 @@ class EncryptedPickle(object):
         '''Verify sealed data signature'''
 
         data = self._remove_magic(data)
-        data = self._urlsafe_b64decode(data)
+        data = urlsafe_nopadding_b64decode(data)
         options = self._read_header(data)
         data = self._add_magic(data)
         self._unsign_data(data, options)
@@ -327,7 +334,7 @@ class EncryptedPickle(object):
         '''Get sealed data options'''
 
         data = self._remove_magic(data)
-        data = self._urlsafe_b64decode(data)
+        data = urlsafe_nopadding_b64decode(data)
         options = self._read_header(data)
         data = self._add_magic(data)
         if verify_signature:
@@ -359,7 +366,7 @@ class EncryptedPickle(object):
             verify_signature = data[-algorithm['hash_size']:]
             data = data[:-algorithm['hash_size']]
             signature = self._hmac_generate(data, algorithm, key)
-            if not self._is_equal(verify_signature, signature):
+            if not const_equal(verify_signature, signature):
                 raise Exception('Invalid signature')
             return data
         elif algorithm['type'] == 'aes':
@@ -693,36 +700,6 @@ class EncryptedPickle(object):
             data.update(default_data)
 
         return data
-
-    @staticmethod
-    def _urlsafe_b64encode(data):
-        '''URL safe Base64 encode without padding (=)'''
-
-        return base64.urlsafe_b64encode(data).rstrip('=')
-
-    @staticmethod
-    def _urlsafe_b64decode(data):
-        '''URL safe Base64 decode without padding (=)'''
-
-        padding = len(data) % 4
-        if padding != 0:
-            padding = 4 - padding
-        padding = '=' * padding
-        data = data + padding
-        return base64.urlsafe_b64decode(data)
-
-    @staticmethod
-    def _is_equal(str_a, str_b):
-        '''Constant time string comparison'''
-
-        if len(str_a) != len(str_b):
-            return False
-
-        result = True
-        for i in range(len(str_a)):
-            result &= (str_a[i] == str_b[i])
-
-        return result
 
     @staticmethod
     def _get_hashlib(digestmode):
